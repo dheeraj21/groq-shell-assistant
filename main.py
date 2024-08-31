@@ -101,23 +101,27 @@ def main(
     os.chdir(current_dir)
     console.clear()
     console.print(Panel.fit(
-        f"[info]Groq-Shell Assistant[/info]\nModel: {model}\nTools: {TOOL_MANAGER.get_tools_list_formatted()}",
+        f"[info]Groq-Shell Assistant[/info]\nModel: {model}\nTools: {TOOL_MANAGER.get_tools_list_formatted()}\n\nType 'quit' to exit the application.",
         border_style="info"
     ))
 
     while True:
         user_input = Prompt.ask("\n[user]You")
-        ai_output = query_agent(user_input, model, messages)
-        console.print(Panel(Markdown(ai_output), title="[ai]Groq Shell", border_style="ai", expand=False))
+        if user_input.lower() == "quit":
+            console.print(Panel("Goodbye!", border_style="info"))
+            break
+        else:
+            ai_output = query_agent(user_input, model, messages)
+            console.print(Panel(Markdown(ai_output), title="[ai]Groq Shell", border_style="ai", expand=False))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Groq-powered AI Assistant")
     parser.add_argument("--model", type=str, default=DEFAULT_MODEL, help="Groq powered Model to use")
     parser.add_argument("--messages", type=json.loads, default=None, help="Initial messages in JSON format")
     parser.add_argument("--current_dir", type=str, default=os.getcwd(), help="Current working directory")
-    
+
     args = parser.parse_args()
-    
+
     initial_messages = args.messages if args.messages is not None else [{"role": "system", "content": SYSTEM_PROMPT}]
-    
+
     main(args.model, initial_messages, args.current_dir)
